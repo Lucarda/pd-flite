@@ -146,7 +146,7 @@ static void flite_synth(t_flite *x);
 static void flite_thread_synth(t_flite *x);
 static void flite_thrd_synth(t_flite *x);
 static void flite_clock_tick(t_flite *x);
-static void flite_thread(t_flite *x);
+static void *flite_thread(t_flite *x);
 
 
 /*--------------------------------------------------------------------
@@ -607,7 +607,7 @@ static void flite_clock_tick(t_flite *x)
 /*--------------------------------------------------------------------
  * flite_thread : thread
  *--------------------------------------------------------------------*/
-static void flite_thread(t_flite *x) {
+static void *flite_thread(t_flite *x) {
     
   while (1) {
     pthread_mutex_lock(&x->x_mutex);
@@ -657,7 +657,7 @@ static void flite_thread(t_flite *x) {
 #ifdef FLITE_DEBUG
   debug("thread quit\n");
 #endif
-  return;
+  return 0;
 }
 
 /*--------------------------------------------------------------------
@@ -688,7 +688,7 @@ static void *flite_new(t_symbol *ary)
   x->x_requestcode = IDLE;
   pthread_mutex_init(&x->x_mutex, 0);
   pthread_cond_init(&x->x_requestcondition, 0);
-  pthread_create(&x->x_tid, 0, flite_thread, x);
+  pthread_create(&x->x_tid, 0, (void * (*)(void *))flite_thread, x);
   
   return (void *)x;
 }
